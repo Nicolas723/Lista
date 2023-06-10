@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -55,7 +56,7 @@ class MainActivity : ComponentActivity() {
                     LazyColumn(modifier = Modifier.weight(1f)) {
                         items(todoList) { todo ->
                             TodoItem(todo = todo) {
-                                todo.checked = !todo.checked
+                                todoList.remove(todo)
                             }
                         }
                     }
@@ -74,22 +75,27 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun TodoItem(todo: TodoItemData, onTodoClicked: () -> Unit) {
+fun TodoItem(todo: TodoItemData, onTaskRemoved: () -> Unit) {
+    var checkedState by remember { mutableStateOf(todo.checked) }
+
+    LaunchedEffect(todo.checked) {
+        checkedState = todo.checked
+    }
+
     Row(modifier = Modifier.padding(16.dp)) {
-        Button(
-            onClick = onTodoClicked,
+        Checkbox(
+            checked = checkedState,
+            onCheckedChange = { isChecked ->
+                checkedState = isChecked
+                todo.checked = isChecked
+            },
             modifier = Modifier.padding(end = 16.dp)
-        ) {
-            Text(text = if (todo.checked) "Desmarcar" else "Marcar")
-        }
+        )
         Text(text = todo.text)
     }
 }
-
-
 
 data class TodoItemData(
     val text: String,
     var checked: Boolean
 )
-
